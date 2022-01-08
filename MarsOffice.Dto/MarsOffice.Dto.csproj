@@ -2,7 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Nullable>enable</Nullable>
+	  <IsPackable>true</IsPackable>
+	  <PackageId>MarsOffice.Dto</PackageId>
+	  <Authors>marsoffice</Authors>
+	  <Company>marsoffice</Company>
+	  <PackageDescription>marsoffice</PackageDescription>
+	  <RepositoryUrl>https://github.com/marsoffice/marsoffice-libraries</RepositoryUrl>
   </PropertyGroup>
 
 </Project>
