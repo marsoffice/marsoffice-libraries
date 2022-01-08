@@ -1,0 +1,96 @@
+name: marsoffice-libraries
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [develop]
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GH_USER: ${{ secrets.GH_USER }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: install gv
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: "5.5.0"
+
+      - name: execute gv
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.9.7
+        with:
+          useConfigFile: true
+          configFilePath: "GitVersion.yml"
+
+      - name: setup net 6
+        uses: actions/setup-dotnet@v1.8.1
+        with:
+          dotnet-version: "6.0.x"
+          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        env:
+          NUGET_AUTH_TOKEN: "%NUGET_AUTH_TOKEN%"
+
+      - name: cache nuget
+        uses: actions/cache@v2
+        id: cache-nuget
+        env:
+          cache-name: cache-nuget
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ env.cache-name }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: dotnet build
+        run: |
+          dotnet build -c Release -p:PackageVersion=${{ steps.gitversion.outputs.semVer }} MarsOffice.Libraries.sln
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: dotnet pack
+        run: dotnet pack -c Release -p:PackageVersion=${{ steps.gitversion.outputs.semVer }} -o ./dist --no-build MarsOffice.Libraries.sln
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v2.2.4
+        if: ${{ success() && github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') }}
+        with:
+          name: dist
+          path: ./dist
+
+  push:
+    runs-on: ubuntu-latest
+    if: ${{ success() && github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') }}
+    needs: [build]
+    steps:
+      - name: download artifact
+        uses: actions/download-artifact@v2.0.10
+        with:
+          name: "dist"
+          path: .
+
+      - name: setup net 6
+        uses: actions/setup-dotnet@v1.8.1
+        with:
+          dotnet-version: "6.0.x"
+          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        env:
+          NUGET_AUTH_TOKEN: "%NUGET_AUTH_TOKEN%"
+
+      - name: dotnet nuget push
+        run: dotnet nuget push *.nupkg --no-symbols --skip-duplicate
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
