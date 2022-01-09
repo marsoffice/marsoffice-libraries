@@ -1,6 +1,6 @@
 namespace MarsOffice.Dto
 {
-    public class OpaIdInputDto
+    public class OpaIdDto
     {
         public string Id { get; set; }
     }
