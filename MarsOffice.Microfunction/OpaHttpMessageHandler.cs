@@ -17,7 +17,7 @@ namespace MarsOffice.Microfunction
 
         protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(_opaToken))
+            if (!string.IsNullOrEmpty(_opaToken))
             {
                 request.RequestUri = new Uri(QueryHelpers.AddQueryString(request.RequestUri.ToString(), "code", _opaToken));
             }
