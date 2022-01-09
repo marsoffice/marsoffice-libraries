@@ -7,6 +7,7 @@ namespace MarsOffice.Dto
     public class GroupDto
     {
         public string Id { get; set; }
+        public string FullId { get; set; }
         public string Name { get; set; }
         public string ParentId { get; set; }
         public IEnumerable<string> ChildrenIds { get; set; }
