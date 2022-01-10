@@ -14,8 +14,9 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .OrResult(r =>
+                .OrResult(response =>
                 {
+                    var r = response.Clone();
                     if (r.Content == null) {
                         return true;
                     }
