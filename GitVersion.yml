@@ -1,5 +1,5 @@
 mode: Mainline
-next-version: 3.0.11
+next-version: 3.0.12
 branches:
   develop:
     tag: dev

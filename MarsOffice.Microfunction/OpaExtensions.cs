@@ -14,9 +14,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 .HandleTransientHttpError()
                 .OrResult(r =>
                 {
-                    return r.Content.Headers.ContentLength.HasValue && r.Content.Headers.ContentLength.Value <= 2;
+                    return r.Content.Headers.ContentLength.HasValue && r.Content.Headers.ContentLength.Value <= 5;
                 })
-                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(retryAttempt));
+                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(2 * retryAttempt));
         }
 
         public static IServiceCollection AddOpaClient(this IServiceCollection services, string opaBaseUrl, string opaToken)
