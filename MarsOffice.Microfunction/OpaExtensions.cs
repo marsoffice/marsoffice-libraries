@@ -16,18 +16,20 @@ namespace Microsoft.Extensions.DependencyInjection
                 .HandleTransientHttpError()
                 .OrResult(r =>
                 {
-                    using var contentStream = r.Content.ReadAsStream();
-                    if (contentStream == null || contentStream.Length == 0)
-                    {
-                        return false;
+                    if (r.Content == null) {
+                        return true;
                     }
+                    using var contentStream = r.Content.ReadAsStream();
                     using var ms = new MemoryStream();
                     contentStream.CopyTo(ms);
+                    if (ms.Length == 0) {
+                        return true;
+                    }
                     var bytes = ms.ToArray();
                     var json = Encoding.UTF8.GetString(bytes)?.Trim();
                     if (string.IsNullOrEmpty(json))
                     {
-                        return false;
+                        return true;
                     }
                     if (json == "{}" || !json.ToLower().Contains("decision"))
                     {
