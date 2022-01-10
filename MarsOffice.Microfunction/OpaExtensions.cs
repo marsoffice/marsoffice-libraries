@@ -1,7 +1,5 @@
 using System;
-using System.IO;
 using System.Net.Http;
-using System.Text;
 using MarsOffice.Microfunction;
 using Polly;
 using Polly.Extensions.Http;
@@ -16,27 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .HandleTransientHttpError()
                 .OrResult(r =>
                 {
-                    if (r.Content == null) {
-                        return true;
-                    }
-                    using var contentStream = r.Content.ReadAsStream();
-                    using var ms = new MemoryStream();
-                    contentStream.CopyTo(ms);
-                    contentStream.Position = 0;
-                    if (ms.Length == 0) {
-                        return true;
-                    }
-                    var bytes = ms.ToArray();
-                    var json = Encoding.UTF8.GetString(bytes)?.Trim();
-                    if (string.IsNullOrEmpty(json))
-                    {
-                        return true;
-                    }
-                    if (json == "{}" || !json.ToLower().Contains("decision"))
-                    {
-                        return true;
-                    }
-                    return false;
+                    return r.Content.Headers.ContentLength.HasValue && r.Content.Headers.ContentLength.Value <= 2;
                 })
                 .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(retryAttempt));
         }
