@@ -14,15 +14,15 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .OrResult(response =>
+                .OrResult(r =>
                 {
-                    var r = response.Clone();
                     if (r.Content == null) {
                         return true;
                     }
                     using var contentStream = r.Content.ReadAsStream();
                     using var ms = new MemoryStream();
                     contentStream.CopyTo(ms);
+                    contentStream.Position = 0;
                     if (ms.Length == 0) {
                         return true;
                     }
@@ -35,17 +35,6 @@ namespace Microsoft.Extensions.DependencyInjection
                     if (json == "{}" || !json.ToLower().Contains("decision"))
                     {
                         return true;
-                    }
-                    if (contentStream.CanSeek)
-                    {
-                        try
-                        {
-                            contentStream.Seek(0, SeekOrigin.Begin);
-                        }
-                        catch (Exception)
-                        {
-                            // ignored
-                        }
                     }
                     return false;
                 })
