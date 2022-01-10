@@ -46,7 +46,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     }
                     return false;
                 })
-                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(retryAttempt * 1000));
+                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(retryAttempt));
         }
 
         public static IServiceCollection AddOpaClient(this IServiceCollection services, string opaBaseUrl, string opaToken)
