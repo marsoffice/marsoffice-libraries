@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     using var ms = new MemoryStream();
                     contentStream.CopyTo(ms);
                     var bytes = ms.ToArray();
-                    var json = Encoding.UTF8.GetString(bytes);
+                    var json = Encoding.UTF8.GetString(bytes)?.Trim();
                     if (string.IsNullOrEmpty(json))
                     {
                         return false;
